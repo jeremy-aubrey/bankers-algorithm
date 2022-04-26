@@ -1,4 +1,3 @@
-# Deadlocks
+# Bankers Algorithm
 
-A multithreaded Java program that demonstrates deadlock avoidance techniques.
 
