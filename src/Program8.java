@@ -45,25 +45,26 @@ public class Program8 {
 		System.out.println("Goodbye");
 	}
 	
-	private void printArr(int[] arr) {
-		System.out.print("[");
+	private String arrToString(int[] arr) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("{");
 		for(int i : arr) {
-			System.out.print(" "+i+" ");
+			builder.append(" "+i+" ");
 		}
-		System.out.println("]");
+		builder.append("}");
+		
+		return builder.toString();
 	}
 	
 	private void processRequest(String command, Banker banker) {
 		String cleaned = command.trim().replaceAll("\\s+", " ");
-		int commandLength = cleaned.split(" ").length;
-		if(commandLength == (2 + NUMBER_OF_RESOURCES)) {
-			String option = cleaned.split(" ")[0];
-			String customerId = cleaned.split(" ")[1];
-			String resources = cleaned.substring(5);
-			if(isValidCommand(option, customerId, resources)) {
+		String[] commandArgs = cleaned.split(" ");
+		if(commandArgs.length == (2 + NUMBER_OF_RESOURCES)) {
+			String option = commandArgs[0];
+			String customerNum = commandArgs[1];
+			int[] resourceArgs = getResourceArgs(commandArgs);
+			if(isValidCommand(option, customerNum, resourceArgs)) {
 				System.out.println("ALL GOOD");
-			} else {
-				System.out.println("[ INVALID COMMAND ARGS ]");
 			}
 			
 		} else {
@@ -72,24 +73,42 @@ public class Program8 {
 		
 	}
 	
-	private boolean isValidCommand(String option, String customerNumber, String resources) {
+	private int[] getResourceArgs(String[] commandArgs) {
+		int[] resources = new int[NUMBER_OF_RESOURCES];
+		for(int i = 0; i < resources.length; i++) {
+			try {
+				resources[i] = Integer.parseInt(commandArgs[i+2]);
+			} catch(NumberFormatException e) {
+				resources[i] = -1;
+			}
+		}
+		return resources;
+	}
+	
+
+	
+	private boolean isValidCommand(String option, String customerNumber, int[] resources) {
 		boolean isValid = true;
 		if(!option.equalsIgnoreCase("RQ") && !option.equalsIgnoreCase("RL") 
 				&& !option.equalsIgnoreCase("OP")) {
 			isValid = false;
+			System.out.println("[ INVALID OPTION ("+option+") ::: MUST BE RQ, RL, OP, OR Q (QUIT) ]");
 		}
 		
 		try {
 			int customerNum = Integer.parseInt(customerNumber);
-			if(customerNum < 0 || customerNum > NUMBER_OF_CUSTOMERS) {
+			if(customerNum < 1 || customerNum > NUMBER_OF_CUSTOMERS) {
 				isValid = false;
+				System.out.println("[ INVALID CUSTOMER NUMBER ("+customerNum+") ::: MUST BE BETWEEN 1 - "+NUMBER_OF_CUSTOMERS+" ]");
 			}
 		} catch (NumberFormatException e) {
 			isValid = false;
+			System.out.println("[ INVALID CUSTOMER NUMBER ("+customerNumber+") ::: MUST BE AN INTEGER ]");
 		}
 		
-		if(!isValidInts(getIntArray(resources), NUMBER_OF_RESOURCES)) {
+		if(!isValidInts(resources, NUMBER_OF_RESOURCES)) {
 			isValid = false;
+			System.out.println("[ INVALID RESOURCE REQUEST ]");
 		}
 		
 		return isValid;
@@ -102,7 +121,7 @@ public class Program8 {
 	}
 	
 	private void displayMenu() {
-		System.out.println("\nEnter a command");
+		System.out.println("\nENTER A COMMAND");
 		System.out.println("---------------");
 		System.out.println("RQ (customer#)"+insertPlaceHolders()+"\t> (request resources)");
 		System.out.println("RL (customer#)"+insertPlaceHolders()+"\t> (release resources)");
