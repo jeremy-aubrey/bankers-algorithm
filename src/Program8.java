@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Scanner;
 
 //********************************************************************
@@ -35,25 +36,15 @@ public class Program8 {
 		Banker banker = new Banker();
 		
 		int[] availableResources = test.setAvailableResources();
+		System.out.println("\nSetting available resouces: "+Arrays.toString(availableResources));
 		
-		String selection = test.getUserSelection();
+		String selection = test.getMenuSelection();
 		while(!selection.equalsIgnoreCase("Q")) {
 			test.processRequest(selection, banker);
-			selection = test.getUserSelection();
+			selection = test.getMenuSelection();
 		}
 		
 		System.out.println("Goodbye");
-	}
-	
-	private String arrToString(int[] arr) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("{");
-		for(int i : arr) {
-			builder.append(" "+i+" ");
-		}
-		builder.append("}");
-		
-		return builder.toString();
 	}
 	
 	private void processRequest(String command, Banker banker) {
@@ -62,7 +53,7 @@ public class Program8 {
 		if(commandArgs.length == (2 + NUMBER_OF_RESOURCES)) {
 			String option = commandArgs[0];
 			String customerNum = commandArgs[1];
-			int[] resourceArgs = getResourceArgs(commandArgs);
+			String resourceArgs = Arrays.toString(Arrays.copyOfRange(commandArgs, 2, commandArgs.length));
 			if(isValidCommand(option, customerNum, resourceArgs)) {
 				System.out.println("ALL GOOD");
 			}
@@ -73,55 +64,45 @@ public class Program8 {
 		
 	}
 	
-	private int[] getResourceArgs(String[] commandArgs) {
-		int[] resources = new int[NUMBER_OF_RESOURCES];
-		for(int i = 0; i < resources.length; i++) {
-			try {
-				resources[i] = Integer.parseInt(commandArgs[i+2]);
-			} catch(NumberFormatException e) {
-				resources[i] = -1;
-			}
-		}
-		return resources;
-	}
-	
-
-	
-	private boolean isValidCommand(String option, String customerNumber, int[] resources) {
+	private boolean isValidCommand(String option, String customerNumber, String resources) {
 		boolean isValid = true;
+		
+		// validate option 
 		if(!option.equalsIgnoreCase("RQ") && !option.equalsIgnoreCase("RL") 
 				&& !option.equalsIgnoreCase("OP")) {
 			isValid = false;
-			System.out.println("[ INVALID OPTION ("+option+") ::: MUST BE RQ, RL, OP, OR Q (QUIT) ]");
+			System.out.println("[ INVALID OPTION ("+option+") :: MUST BE RQ, RL, OP, OR Q (QUIT) ]");
 		}
 		
+		// validate customer number
 		try {
 			int customerNum = Integer.parseInt(customerNumber);
 			if(customerNum < 1 || customerNum > NUMBER_OF_CUSTOMERS) {
 				isValid = false;
-				System.out.println("[ INVALID CUSTOMER NUMBER ("+customerNum+") ::: MUST BE BETWEEN 1 - "+NUMBER_OF_CUSTOMERS+" ]");
+				System.out.println("[ INVALID CUSTOMER NUMBER ("+customerNum+") :: MUST BE BETWEEN 1 - "+NUMBER_OF_CUSTOMERS+" ]");
 			}
 		} catch (NumberFormatException e) {
 			isValid = false;
-			System.out.println("[ INVALID CUSTOMER NUMBER ("+customerNumber+") ::: MUST BE AN INTEGER ]");
+			System.out.println("[ INVALID CUSTOMER NUMBER ("+customerNumber+") :: MUST BE AN INTEGER ]");
 		}
 		
-		if(!isValidInts(resources, NUMBER_OF_RESOURCES)) {
+		// validate resource request
+		if(!isValidArray(getIntArray(resources), NUMBER_OF_RESOURCES)) {
 			isValid = false;
-			System.out.println("[ INVALID RESOURCE REQUEST ]");
+			System.out.println("[ INVALID RESOURCE REQUEST "+resources+" ]");
 		}
 		
 		return isValid;
 	}
 	
-	private String getUserSelection() {
+	private String getMenuSelection() {
 		displayMenu();
 		String input = getUserInput().trim();
 		return input;
 	}
 	
 	private void displayMenu() {
-		System.out.println("\nENTER A COMMAND");
+		System.out.println("\nEnter a command");
 		System.out.println("---------------");
 		System.out.println("RQ (customer#)"+insertPlaceHolders()+"\t> (request resources)");
 		System.out.println("RL (customer#)"+insertPlaceHolders()+"\t> (release resources)");
@@ -140,9 +121,10 @@ public class Program8 {
 	
 	private int[] setAvailableResources() {
 		System.out.println("\nEnter the number of resources sepearated by a space");
+		System.out.println("---------------------------------------------------");
 		System.out.println("Ex: 10 5 7 8");
 		int[] available = getIntArray(getUserInput());
-		while(!isValidInts(available, NUMBER_OF_RESOURCES)) {
+		while(!isValidArray(available, NUMBER_OF_RESOURCES)) {
 			System.out.println("Must enter " + NUMBER_OF_RESOURCES + " positive integers");
 			available = getIntArray(getUserInput());
 		}
@@ -150,11 +132,12 @@ public class Program8 {
 	}
 	
 	private int[] getIntArray(String input) {
-		String[] str = input.trim().split("\\s+");
-		int[] newArray = new int[str.length];
-		for(int i = 0; i < str.length; i++) {
+		String str = input.replaceAll("\\[|\\]|,", " "); // handle [1, 2, 3] format
+		String[] arr = str.trim().split("\\s+"); // handle 1 2 3 format
+		int[] newArray = new int[arr.length];
+		for(int i = 0; i < arr.length; i++) {
 			try {
-				newArray[i] = Integer.parseInt(str[i]);
+				newArray[i] = Integer.parseInt(arr[i]);
 			} catch (NumberFormatException e) {
 				newArray[i] = -1;
 				break;
@@ -169,7 +152,7 @@ public class Program8 {
 		return input;
 	}
 	
-	private boolean isValidInts(int[] input, int expectedLength) {
+	private boolean isValidArray(int[] input, int expectedLength) {
 		boolean isValid = true;
 		if(input.length == expectedLength) {
 			for(int num : input) {
