@@ -50,16 +50,20 @@ public class Program8 {
 	private void processRequest(String command, Banker banker) {
 		String cleaned = command.trim().replaceAll("\\s+", " ");
 		String[] commandArgs = cleaned.split(" ");
-		if(commandArgs.length == (2 + NUMBER_OF_RESOURCES)) {
+		if(commandArgs.length == 1 && commandArgs[0].equalsIgnoreCase("OP")) {
+			
+			System.out.println("Display data...");
+			
+		} else if(commandArgs.length == (2 + NUMBER_OF_RESOURCES)) {
 			String option = commandArgs[0];
 			String customerNum = commandArgs[1];
 			String resourceArgs = Arrays.toString(Arrays.copyOfRange(commandArgs, 2, commandArgs.length));
 			if(isValidCommand(option, customerNum, resourceArgs)) {
 				System.out.println("ALL GOOD");
 			}
-			
+
 		} else {
-			System.out.println("[ INVALID COMMAND LENGTH ]");
+			System.out.println("[ INVALID COMMAND ]");
 		}
 		
 	}
@@ -68,11 +72,13 @@ public class Program8 {
 		boolean isValid = true;
 		
 		// validate option 
-		if(!option.equalsIgnoreCase("RQ") && !option.equalsIgnoreCase("RL") 
-				&& !option.equalsIgnoreCase("OP")) {
+		if (option.equalsIgnoreCase("OP")) {
 			isValid = false;
-			System.out.println("[ INVALID OPTION ("+option+") :: MUST BE RQ, RL, OP, OR Q (QUIT) ]");
-		}
+			System.out.println("[ INVALID ARGS FOR COMMAND ("+option.toUpperCase()+") :: NO ARGS ]");
+		} else if(!option.equalsIgnoreCase("RQ") && !option.equalsIgnoreCase("RL")) {
+			isValid = false;
+			System.out.println("[ INVALID OPTION ("+option+") :: SELECT FROM RQ, RL, OP, or Q ]");
+		} 
 		
 		// validate customer number
 		try {
@@ -89,7 +95,7 @@ public class Program8 {
 		// validate resource request
 		if(!isValidArray(getIntArray(resources), NUMBER_OF_RESOURCES)) {
 			isValid = false;
-			System.out.println("[ INVALID RESOURCE REQUEST "+resources+" ]");
+			System.out.println("[ INVALID RESOURCE REQUEST "+resources+" :: MUST BE POSITIVE INTEGERS ]");
 		}
 		
 		return isValid;
@@ -107,8 +113,8 @@ public class Program8 {
 		System.out.println("RQ (customer#)"+insertPlaceHolders()+"\t> (request resources)");
 		System.out.println("RL (customer#)"+insertPlaceHolders()+"\t> (release resources)");
 		System.out.println("OP \t\t\t> (output values)");
+		System.out.println("Q \t\t\t> (quit)");
 		System.out.println("\nEx: RQ 0 3 1 2 1\n");
-
 	}
 	
 	private String insertPlaceHolders() {
@@ -125,7 +131,7 @@ public class Program8 {
 		System.out.println("Ex: 10 5 7 8");
 		int[] available = getIntArray(getUserInput());
 		while(!isValidArray(available, NUMBER_OF_RESOURCES)) {
-			System.out.println("Must enter " + NUMBER_OF_RESOURCES + " positive integers");
+			System.out.println("[ MUST ENTER " + NUMBER_OF_RESOURCES + " POSITIVE INTEGERS ]");
 			available = getIntArray(getUserInput());
 		}
 		return available;
@@ -143,6 +149,7 @@ public class Program8 {
 				break;
 			}
 		}
+		
 		return newArray;
 	}
 	
